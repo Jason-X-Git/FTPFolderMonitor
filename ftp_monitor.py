@@ -365,7 +365,7 @@ class FTPMonitor(object):
 
         today = datetime.date.today()
         today_ending_time = datetime.datetime(year=today.year, month=today.month, day=today.day,
-                                              hour=ending_hour)
+                                              hour=daily_ending_hour)
 
         self.main_logger.info('Start working at {}'.format(time.strftime('%H:%M:%S')))
         self.main_logger.newLine()

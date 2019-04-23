@@ -1,9 +1,13 @@
 import os
 
-uploading_checking_break_minutes = 0.1
+# 5 minutes for small folder, and 20 minutes for large folder are recommended.
+uploading_checking_break_minutes = 20
+# Set a timeout for monitoring a folder which is not completed in uploading within 2 hours
 uploading_checking_time_out_hours = 2
-main_program_break_minutes = 0.1
-ending_hour = 9
+# Take a break for the checking loop, 5 minutes recommended.
+main_program_break_minutes = 5
+# The program stops at this time everyday if you run it in task schedule
+daily_ending_hour = 21
 
 # The folder will be monitored
 ftp_folder = r'C:\ftp_test\source'
