@@ -185,7 +185,13 @@ class FolderTransferWorker(object):
         self.tracking_uuid = str(uuid.uuid1())
         self.new_folder = new_folder
         self.new_folder_name = os.path.basename(self.new_folder)
-        self.target_folder = os.path.join(target_root_folder, self.new_folder_name)
+
+        self.target_folder = os.path.join(target_root_folder, datetime.date.today().strftime('%Y-%m-%d'),
+                                          self.new_folder_name)
+
+        self.archive_folder = os.path.join(archive_root_folder, datetime.date.today().strftime('%Y-%m-%d'),
+                                           self.new_folder_name)
+
         self.check_break_minutes = uploading_checking_break_minutes
         self.logger, self.log_file = create_logger(main_log_folder, self.new_folder_name.replace(' ', '_'))
         self.time_out_hours = uploading_checking_time_out_hours
@@ -201,8 +207,11 @@ class FolderTransferWorker(object):
         )
         self.master_monitor_dict[self.tracking_uuid] = self.tracking_ordered_dict
 
-    def update_transfer_status(self, status):
+    def update_transfer_status(self, status, target_folder=None):
         self.tracking_ordered_dict[transfer_status_key] = status
+        if target_folder is not None:
+            self.tracking_ordered_dict[target_folder_key] = target_folder
+
         self.master_monitor_dict[self.tracking_uuid] = self.tracking_ordered_dict
 
     def check_if_completed(self):
@@ -248,21 +257,31 @@ class FolderTransferWorker(object):
         try:
             self.logger.info('Starting working on {}'.format(self.new_folder_name))
 
-            if os.path.isdir(self.target_folder):
-                self.target_folder = os.path.join(os.path.dirname(self.target_folder),
-                                                  '{}_{}'.format(os.path.basename(self.target_folder),
-                                                                 datetime.datetime.now().strftime('%Y%m%d%H%M%S')))
-
             self.check_if_completed()
 
             if self.finished:
-                self.update_transfer_status(copying_status)
+
+                if os.path.isdir(self.target_folder):
+                    self.target_folder = os.path.join(os.path.dirname(self.target_folder),
+                                                      '{}_{}'.format(os.path.basename(self.target_folder),
+                                                                     datetime.datetime.now().strftime('%Y%m%d%H%M%S')))
+
+                self.update_transfer_status(copying_status, target_folder=self.target_folder)
 
                 self.logger.info('Starting copying {} to {}'.format(self.new_folder, self.target_folder))
                 shutil.copytree(self.new_folder, self.target_folder)
                 self.logger.info('Done with copying {}'.format(self.new_folder_name))
 
                 self.update_transfer_status(copied_status)
+
+                if os.path.isdir(self.archive_folder):
+                    self.archive_folder = os.path.join(os.path.dirname(self.archive_folder),
+                                                       '{}_{}'.format(os.path.basename(self.archive_folder),
+                                                                      datetime.datetime.now().strftime('%Y%m%d%H%M%S')))
+
+                self.logger.info('Starting archiving {} to {}'.format(self.new_folder, self.archive_folder))
+                shutil.move(self.new_folder, self.archive_folder)
+                self.logger.info('Done with archiving {}'.format(self.new_folder_name))
 
         except Exception as e:
             self.logger.exception(e)
