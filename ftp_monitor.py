@@ -110,6 +110,9 @@ def create_logger(log_folder, logger_name):
 
         log_file_path = os.path.join(log_folder, datetime.date.today().strftime('%Y-%m-%d'),
                                      "{0}_{1}.txt".format(logger_name, time.strftime("%Y_%m_%d_%H_%M_%S")))
+        if not os.path.isdir(os.path.dirname(log_file_path)):
+            os.makedirs(os.path.dirname(log_file_path))
+
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.DEBUG)
 
