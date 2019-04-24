@@ -4,7 +4,6 @@ import logging.config
 import logging.handlers
 import math
 import multiprocessing as mp
-import os
 import re
 import shutil
 import time
@@ -357,8 +356,12 @@ class FTPMonitor(object):
                 count += 1
                 self.main_logger.info('{}. {}'.format(count, status))
                 for tracking_index, tracking_id in enumerate(status_dict.keys()):
-                    self.main_logger.info('({}). {}'.format(tracking_index + 1,
-                                                            status_dict[tracking_id][target_folder_key]))
+                    tracking_details = '({}). {}'.format(tracking_index + 1,
+                                                         status_dict[tracking_id][target_folder_key])
+                    if status == failure_status:
+                        tracking_details += ' - {}'.format(status_dict[tracking_id][transfer_status_key])
+
+                    self.main_logger.info(tracking_details)
 
     def run(self):
         keep_running = True
