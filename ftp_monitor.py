@@ -108,7 +108,8 @@ def create_logger(log_folder, logger_name):
         DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
         formatter = logging.Formatter(fmt=FORMAT, datefmt=DATE_FORMAT)
 
-        log_file_path = log_folder + "\\" + "{0}_{1}.txt".format(logger_name, time.strftime("%Y_%m_%d_%H_%M_%S"))
+        log_file_path = os.path.join(log_folder, datetime.date.today().strftime('%Y-%m-%d'),
+                                     "{0}_{1}.txt".format(logger_name, time.strftime("%Y_%m_%d_%H_%M_%S")))
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.DEBUG)
 
